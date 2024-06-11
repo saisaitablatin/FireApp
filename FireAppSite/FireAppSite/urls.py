@@ -22,6 +22,7 @@ from FireApp.views import (
     PieCountbySeverity,
     LineCountbyMonth,
     MultilineIncidentTop3Country,
+    multipleBarbySeverity,
 )
 
 urlpatterns = [
@@ -30,4 +31,5 @@ urlpatterns = [
     path("chart/", PieCountbySeverity, name="chart"),
     path("lineChart/", LineCountbyMonth, name="lineChart"),
     path("multilineChart/", MultilineIncidentTop3Country, name="chart"),
+    path("multiBarChart/", multipleBarbySeverity, name="chart"),
 ]
