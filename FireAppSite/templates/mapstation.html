@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<div class="page-inner">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card card-transparent">
+        <div class="card-header">
+          <h4 class="card-title text-center" style="margin-top: 15vmin;">Fire Stations</h4>
+        </div>
+        <div class="card-body">
+          <div class="col-md-10 ml-auto mr-auto">
+            <form method="get" action="{% url 'map-station' %}">
+              <label for="city">Select City:</label>
+              <select name="city" id="city" onchange="this.form.submit()">
+                <option value="">All Cities</option>
+                {% for city in cities %}
+                  <option value="{{ city }}" {% if city == selected_city %}selected{% endif %}>{{ city }}</option>
+                {% endfor %}
+              </select>
+            </form>
+            <div id="map" style="width: 100%; height: 400px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+  var map = L.map('map').setView([9.81644, 118.72239], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  var truckIcon = L.icon({
+    iconUrl: '{% static 'img/fire-truck-3.png' %}',
+    iconSize: [50, 50]
+  });
+
+  var fireStations = {{ fireStations|safe }};
+  var fireIncidents = JSON.parse('{{ fireIncidents|escapejs }}');
+
+  // Add fire station markers
+  fireStations.forEach(function(station) {
+    var marker = L.marker([station.latitude, station.longitude], { icon: truckIcon }).addTo(map);
+    marker.bindPopup(station.name);
+  });
+
+  // Add fire incident markers
+  fireIncidents.forEach(function(incident) {
+    console.log(incident)
+    if (incident.severity_level === "High") {
+      var marker = L.circleMarker([incident.latitude, incident.longitude], {
+        color: 'red',
+        radius: 8
+      }).addTo(map);
+    } else if (incident.severity_level === "Medium") {
+      var marker = L.circleMarker([incident.latitude, incident.longitude], {
+        color: 'yellow',
+        radius: 6
+      }).addTo(map);
+    } else {
+      var marker = L.circleMarker([incident.latitude, incident.longitude], {
+        color: 'green',
+        radius: 4
+      }).addTo(map);
+    }
+    marker.bindPopup(`${new Date(incident.date_time).toLocaleString()} - ${incident.severity_level}`);
+  });
+</script>
+{% endblock %}

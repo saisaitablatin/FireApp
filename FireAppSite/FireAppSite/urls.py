@@ -23,13 +23,15 @@ from FireApp.views import (
     LineCountbyMonth,
     MultilineIncidentTop3Country,
     multipleBarbySeverity,
+    map_station,
 )
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("dashboard_chart/", ChartView.as_view(), name="dashboard-chart"),
+    path("", ChartView.as_view(), name="dashboard-chart"),
     path("chart/", PieCountbySeverity, name="chart"),
     path("lineChart/", LineCountbyMonth, name="lineChart"),
     path("multilineChart/", MultilineIncidentTop3Country, name="chart"),
     path("multiBarChart/", multipleBarbySeverity, name="chart"),
+    path("stations/", map_station, name="map-station"),
 ]
