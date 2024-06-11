@@ -17,10 +17,11 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from FireApp.views import ChartView, PieCountbySeverity
+from FireApp.views import ChartView, PieCountbySeverity, LineCountbyMonth
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("dashboard_chart/", ChartView.as_view(), name="dashboard-chart"),
     path("chart/", PieCountbySeverity, name="chart"),
+    path("lineChart/", LineCountbyMonth, name="lineChart"),
 ]
