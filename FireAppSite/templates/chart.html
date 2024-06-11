@@ -50,6 +50,66 @@
           </div>
         </div>
       </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top Countries with Most Fire Incidents Over the Years</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="barTopCountriesChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Monthly Fire Incidents per Fire Station</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="lineIncidentsByStationChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Distribution of Fire Incidents by Severity Level and Fire Station</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="barSeverityByStationChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Fire Incidents by Fire Station</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="doughnutChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Fire Incidents Distribution</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="bubbleChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}
@@ -364,6 +424,158 @@
       const data = await response.json()
       return data
     }
+    async function loadChartData() {
+      const doughnutData = await fetchData('/doughnutIncidentsByStation/')
+      const doughnutCtx = document.getElementById('doughnutChart').getContext('2d')
+      new Chart(doughnutCtx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(doughnutData),
+          datasets: [
+            {
+              data: Object.values(doughnutData),
+              backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56'],
+              hoverBackgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56']
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      })
+    
+      const bubbleData = await fetchData('/bubbleChartData/')
+      const bubbleCtx = document.getElementById('bubbleChart').getContext('2d')
+      new Chart(bubbleCtx, {
+        type: 'bubble',
+        data: {
+          datasets: bubbleData.map((item) => ({
+            label: item.severity,
+            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+            borderColor: 'rgba(0, 123, 255, 1)',
+            data: [
+              {
+                x: item.x,
+                y: item.y,
+                r: item.r * 5 // Multiply radius by 5 for better visualization
+              }
+            ]
+          }))
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            xAxes: [
+              {
+                ticks: {
+                  beginAtZero: true
+                }
+              }
+            ],
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true
+                }
+              }
+            ]
+          }
+        }
+      })
+      const barTopCountriesData = await fetchData('/barTopCountriesOverYears/')
+      const barTopCountriesCtx = document.getElementById('barTopCountriesChart').getContext('2d')
+      const barTopCountriesChartData = {
+        labels: Object.keys(barTopCountriesData),
+        datasets: []
+      }
+      Object.keys(barTopCountriesData).forEach((year, index) => {
+        barTopCountriesData[year].forEach((countryData) => {
+          const dataset = barTopCountriesChartData.datasets.find((d) => d.label === countryData.country)
+          if (!dataset) {
+            barTopCountriesChartData.datasets.push({
+              label: countryData.country,
+              backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`,
+              data: []
+            })
+          }
+          barTopCountriesChartData.datasets.find((d) => d.label === countryData.country).data[index] = countryData.count
+        })
+      })
+      new Chart(barTopCountriesCtx, {
+        type: 'bar',
+        data: barTopCountriesChartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true }
+          }
+        }
+      })
+    
+      // Fetch and render Monthly Fire Incidents per Fire Station
+      const lineIncidentsByStationData = await fetchData('/lineMonthlyIncidentsByStation/')
+      const lineIncidentsByStationCtx = document.getElementById('lineIncidentsByStationChart').getContext('2d')
+      const lineIncidentsByStationChartData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: []
+      }
+      Object.keys(lineIncidentsByStationData).forEach((station, index) => {
+        lineIncidentsByStationChartData.datasets.push({
+          label: station,
+          borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+          backgroundColor: 'transparent',
+          data: Object.values(lineIncidentsByStationData[station])
+        })
+      })
+      new Chart(lineIncidentsByStationCtx, {
+        type: 'line',
+        data: lineIncidentsByStationChartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { beginAtZero: true },
+            y: { beginAtZero: true }
+          }
+        }
+      })
+    
+      // Fetch and render Distribution of Fire Incidents by Severity Level and Fire Station
+      const barSeverityByStationData = await fetchData('/barSeverityByStation/')
+      const barSeverityByStationCtx = document.getElementById('barSeverityByStationChart').getContext('2d')
+      const barSeverityByStationChartData = {
+        labels: Object.keys(barSeverityByStationData),
+        datasets: []
+      }
+      const severityLevels = new Set()
+      Object.values(barSeverityByStationData).forEach((severityData) => {
+        Object.keys(severityData).forEach((severity) => severityLevels.add(severity))
+      })
+      severityLevels.forEach((severity, index) => {
+        barSeverityByStationChartData.datasets.push({
+          label: severity,
+          backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`,
+          data: Object.keys(barSeverityByStationData).map((station) => barSeverityByStationData[station][severity] || 0)
+        })
+      })
+      new Chart(barSeverityByStationCtx, {
+        type: 'bar',
+        data: barSeverityByStationChartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true }
+          }
+        }
+      })
+    }
+    loadChartData()
   </script>
 
   <script>

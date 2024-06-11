@@ -258,3 +258,105 @@ def map_station(request):
     }
 
     return render(request, "mapstation.html", context)
+
+
+def barTopCountriesOverYears(request):
+    query = """
+    SELECT fl.country, strftime('%Y', fi.date_time) AS year, COUNT(fi.id) AS incident_count
+    FROM FireApp_fireincident fi
+    JOIN FireApp_firelocation fl ON fi.location_id = fl.id
+    GROUP BY fl.country, year
+    ORDER BY year, incident_count DESC;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+    result = {}
+    for row in rows:
+        country = row[0]
+        year = row[1]
+        count = row[2]
+        if year not in result:
+            result[year] = []
+        result[year].append({"country": country, "count": count})
+
+    return JsonResponse(result)
+
+
+def lineMonthlyIncidentsByStation(request):
+    query = """
+    SELECT fs.name, strftime('%m', fi.date_time) AS month, COUNT(fi.id) AS incident_count
+    FROM FireApp_fireincident fi
+    JOIN FireApp_firestation fs ON fi.location_id = fs.location_id
+    GROUP BY fs.name, month
+    ORDER BY fs.name, month;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+    result = {}
+    for row in rows:
+        station = row[0]
+        month = row[1]
+        count = row[2]
+        if station not in result:
+            result[station] = {str(i).zfill(2): 0 for i in range(1, 13)}
+        result[station][month] = count
+
+    return JsonResponse(result)
+
+
+def barSeverityByStation(request):
+    query = """
+    SELECT fs.name, fi.severity_level, COUNT(fi.id) AS incident_count
+    FROM FireApp_fireincident fi
+    JOIN FireApp_firestation fs ON fi.location_id = fs.location_id
+    GROUP BY fs.name, fi.severity_level
+    ORDER BY fs.name, fi.severity_level;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+    result = {}
+    for row in rows:
+        station = row[0]
+        severity = row[1]
+        count = row[2]
+        if station not in result:
+            result[station] = {}
+        result[station][severity] = count
+
+    return JsonResponse(result)
+
+
+def doughnutIncidentsByStation(request):
+    query = """
+    SELECT fs.name, COUNT(fi.id) as count
+    FROM FireApp_fireincident fi
+    JOIN FireApp_firestation fs ON fi.location_id = fs.location_id
+    GROUP BY fs.name
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+    data = {row[0]: row[1] for row in rows}
+    return JsonResponse(data)
+
+
+def bubbleChartData(request):
+    query = """
+    SELECT severity_level, latitude, longitude, COUNT(*) as count
+    FROM FireApp_fireincident
+    WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+    GROUP BY severity_level, latitude, longitude
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+    data = [{"severity": row[0], "x": row[1], "y": row[2], "r": row[3]} for row in rows]
+    return JsonResponse(data, safe=False)

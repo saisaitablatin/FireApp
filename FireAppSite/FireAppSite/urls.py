@@ -23,6 +23,11 @@ from FireApp.views import (
     LineCountbyMonth,
     MultilineIncidentTop3Country,
     multipleBarbySeverity,
+    barTopCountriesOverYears,
+    lineMonthlyIncidentsByStation,
+    barSeverityByStation,
+    doughnutIncidentsByStation,
+    bubbleChartData,
     map_station,
 )
 
@@ -33,5 +38,12 @@ urlpatterns = [
     path("lineChart/", LineCountbyMonth, name="lineChart"),
     path("multilineChart/", MultilineIncidentTop3Country, name="chart"),
     path("multiBarChart/", multipleBarbySeverity, name="chart"),
+    path("barTopCountriesOverYears/", barTopCountriesOverYears, name="chart"),
+    path("lineMonthlyIncidentsByStation/", lineMonthlyIncidentsByStation, name="chart"),
+    path("barSeverityByStation/", barSeverityByStation, name="chart"),
+    path(
+        "doughnutIncidentsByStation/", doughnutIncidentsByStation, name="doughnutChart"
+    ),
+    path("bubbleChartData/", bubbleChartData, name="bubbleChart"),
     path("stations/", map_station, name="map-station"),
 ]
