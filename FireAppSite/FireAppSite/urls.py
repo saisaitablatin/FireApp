@@ -1,5 +1,5 @@
 """
-URL configuration for FireAppProject project.
+URL configuration for FireAppSite project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.0/topics/http/urls/
@@ -21,5 +21,5 @@ from FireApp.views import ChartView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("dashboard_chart", ChartView.as_view(), name="dashboard-chart"),
+    path("dashboard_chart/", ChartView.as_view(), name="dashboard-chart"),
 ]

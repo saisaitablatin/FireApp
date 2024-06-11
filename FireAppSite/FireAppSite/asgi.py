@@ -1,5 +1,5 @@
 """
-ASGI config for FireAppProject project.
+ASGI config for FireAppSite project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FireAppProject.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FireAppSite.settings')
 
 application = get_asgi_application()
