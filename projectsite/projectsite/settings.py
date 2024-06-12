@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +26,7 @@ SECRET_KEY = "django-insecure-d@4a$whi@(x03p+^ccwzokc$xcs*)qez!1(p_bdyvq1ebk6!3e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["sairah18.pythonanywhere.com", "127.0.0.1"]
 
 
 # Application definition
@@ -56,7 +57,7 @@ ROOT_URLCONF = "projectsite.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'templates')],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -118,10 +119,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = (
-    BASE_DIR / 'static',
-)
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = (BASE_DIR / "static",)
 
 
 # Default primary key field type
