@@ -3,12 +3,19 @@ from django.views.generic.list import ListView
 from django.db import connection
 from django.http import JsonResponse
 from django.db.models.functions import ExtractMonth
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
 
-
-from django.db.models import Count
+from django.db.models import Count, Avg, F
 from datetime import datetime
-
-from fire.models import Locations, Incident, FireStation
+from fire.models import (
+    Firefighters,
+    FireTruck,
+    Incident,
+    WeatherConditions,
+    Locations,
+    FireStation,
+)
 
 
 class HomePageView(ListView):
@@ -204,3 +211,238 @@ def MapStation(request):
     }
 
     return render(request, "map_station.html", context)
+
+
+def FireIncidentsMap(request):
+    incidents = Incident.objects.values(
+        "location__name", "location__latitude", "location__longitude", "severity_level"
+    )
+
+    for incident in incidents:
+        incident["location__latitude"] = float(incident["location__latitude"])
+        incident["location__longitude"] = float(incident["location__longitude"])
+
+    incidents_list = list(incidents)
+
+    context = {
+        "incidents": incidents_list,
+    }
+
+    return render(request, "fire_incidents.html", context)
+
+
+def get_incidents_by_location(request, location):
+    incidents = Incident.objects.filter(location__name=location).values(
+        "location__latitude", "location__longitude", "severity_level", "location__name"
+    )
+
+    for incident in incidents:
+        incident["location__latitude"] = float(incident["location__latitude"])
+        incident["location__longitude"] = float(incident["location__longitude"])
+
+    incidents_list = list(incidents)
+    return JsonResponse(incidents_list, safe=False)
+
+
+def BarFirefighterExperience(request):
+    data = Firefighters.objects.values("experience_level").annotate(count=Count("id"))
+    result = {entry["experience_level"]: entry["count"] for entry in data}
+    return JsonResponse(result)
+
+
+def PieFireTruckCapacity(request):
+    data = FireTruck.objects.values("capacity").annotate(count=Count("id"))
+    result = {entry["capacity"]: entry["count"] for entry in data}
+    return JsonResponse(result)
+
+
+def LineIncidentSeverityOverTime(request):
+    data = (
+        Incident.objects.extra(select={"month": "strftime('%Y-%m', date_time)"})
+        .values("month", "severity_level")
+        .annotate(count=Count("id"))
+        .order_by("month")
+    )
+    result = {}
+    for entry in data:
+        month = entry["month"]
+        if month not in result:
+            result[month] = {"Minor Fire": 0, "Moderate Fire": 0, "Major Fire": 0}
+        result[month][entry["severity_level"]] = entry["count"]
+    return JsonResponse(result)
+
+
+def HistogramTemperatureDuringIncidents(request):
+    data = (
+        WeatherConditions.objects.values("temperature")
+        .annotate(count=Count("id"))
+        .order_by("temperature")
+    )
+    result = {float(entry["temperature"]): entry["count"] for entry in data}
+    return JsonResponse(result)
+
+
+def HorizontalBarIncidentsByCity(request):
+    data = (
+        Incident.objects.values(city=F("location__city"))
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+    result = {entry["city"]: entry["count"] for entry in data}
+    return JsonResponse(result)
+
+
+# Location Views
+class LocationListView(ListView):
+    model = Locations
+    template_name = "location_list.html"
+
+
+class LocationCreateView(CreateView):
+    model = Locations
+    fields = "__all__"
+    template_name = "location_form.html"
+    success_url = reverse_lazy("location-list")
+
+
+class LocationUpdateView(UpdateView):
+    model = Locations
+    fields = "__all__"
+    template_name = "location_form.html"
+    success_url = reverse_lazy("location-list")
+
+
+class LocationDeleteView(DeleteView):
+    model = Locations
+    template_name = "location_confirm_delete.html"
+    success_url = reverse_lazy("location-list")
+
+
+# Incident Views
+class IncidentListView(ListView):
+    model = Incident
+    template_name = "incident_list.html"
+
+
+class IncidentCreateView(CreateView):
+    model = Incident
+    fields = "__all__"
+    template_name = "incident_form.html"
+    success_url = reverse_lazy("incident-list")
+
+
+class IncidentUpdateView(UpdateView):
+    model = Incident
+    fields = "__all__"
+    template_name = "incident_form.html"
+    success_url = reverse_lazy("incident-list")
+
+
+class IncidentDeleteView(DeleteView):
+    model = Incident
+    template_name = "incident_confirm_delete.html"
+    success_url = reverse_lazy("incident-list")
+
+
+# FireStation Views
+class FireStationListView(ListView):
+    model = FireStation
+    template_name = "firestation_list.html"
+
+
+class FireStationCreateView(CreateView):
+    model = FireStation
+    fields = "__all__"
+    template_name = "firestation_form.html"
+    success_url = reverse_lazy("firestation-list")
+
+
+class FireStationUpdateView(UpdateView):
+    model = FireStation
+    fields = "__all__"
+    template_name = "firestation_form.html"
+    success_url = reverse_lazy("firestation-list")
+
+
+class FireStationDeleteView(DeleteView):
+    model = FireStation
+    template_name = "firestation_confirm_delete.html"
+    success_url = reverse_lazy("firestation-list")
+
+
+# Firefighter Views
+class FirefighterListView(ListView):
+    model = Firefighters
+    template_name = "firefighter_list.html"
+
+
+class FirefighterCreateView(CreateView):
+    model = Firefighters
+    fields = "__all__"
+    template_name = "firefighter_form.html"
+    success_url = reverse_lazy("firefighter-list")
+
+
+class FirefighterUpdateView(UpdateView):
+    model = Firefighters
+    fields = "__all__"
+    template_name = "firefighter_form.html"
+    success_url = reverse_lazy("firefighter-list")
+
+
+class FirefighterDeleteView(DeleteView):
+    model = Firefighters
+    template_name = "firefighter_confirm_delete.html"
+    success_url = reverse_lazy("firefighter-list")
+
+
+# FireTruck Views
+class FireTruckListView(ListView):
+    model = FireTruck
+    template_name = "firetruck_list.html"
+
+
+class FireTruckCreateView(CreateView):
+    model = FireTruck
+    fields = "__all__"
+    template_name = "firetruck_form.html"
+    success_url = reverse_lazy("firetruck-list")
+
+
+class FireTruckUpdateView(UpdateView):
+    model = FireTruck
+    fields = "__all__"
+    template_name = "firetruck_form.html"
+    success_url = reverse_lazy("firetruck-list")
+
+
+class FireTruckDeleteView(DeleteView):
+    model = FireTruck
+    template_name = "firetruck_confirm_delete.html"
+    success_url = reverse_lazy("firetruck-list")
+
+
+# WeatherCondition Views
+class WeatherConditionListView(ListView):
+    model = WeatherConditions
+    template_name = "weathercondition_list.html"
+
+
+class WeatherConditionCreateView(CreateView):
+    model = WeatherConditions
+    fields = "__all__"
+    template_name = "weathercondition_form.html"
+    success_url = reverse_lazy("weathercondition-list")
+
+
+class WeatherConditionUpdateView(UpdateView):
+    model = WeatherConditions
+    fields = "__all__"
+    template_name = "weathercondition_form.html"
+    success_url = reverse_lazy("weathercondition-list")
+
+
+class WeatherConditionDeleteView(DeleteView):
+    model = WeatherConditions
+    template_name = "weathercondition_confirm_delete.html"
+    success_url = reverse_lazy("weathercondition-list")

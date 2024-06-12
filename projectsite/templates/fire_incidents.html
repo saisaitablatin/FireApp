@@ -1,0 +1,126 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+  <div class="page-inner">
+    <div class="page-header">
+      <h4 class="page-title">Fire Incidents Map</h4>
+      <ul class="breadcrumbs">
+        <li class="nav-home">
+          <a href="#"><i class="flaticon-home"></i></a>
+        </li>
+        <li class="separator">
+          <i class="flaticon-right-arrow"></i>
+        </li>
+        <li class="nav-item">
+          <a href="#">Maps</a>
+        </li>
+        <li class="separator">
+          <i class="flaticon-right-arrow"></i>
+        </li>
+        <li class="nav-item">
+          <a href="#">Fire Incidents</a>
+        </li>
+      </ul>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-transparent">
+          <div class="card-header">
+            <h4 class="card-title text-center">Fire Incidents Map</h4>
+            <p class="card-category text-center">
+              Visualize fire incidents on the map. Made by our friends from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>.
+            </p>
+          </div>
+          <div class="card-body">
+            <div class="col-md-10 ml-auto mr-auto">
+              <div class="form-group">
+                <label for="locationFilter">Filter by Location</label>
+                <select id="locationFilter" class="form-control">
+                  <option value="">Select a location</option>
+                  {% for incident in incidents %}
+                    <option value="{{ incident.location__name }}">{{ incident.location__name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div id="map" style="width: 100%; height: 400px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([9.81644, 118.72239], 13);
+
+    function getCircleOptions(severity) {
+      switch (severity) {
+        case 'Minor Fire':
+          return { color: 'green', radius: 50 };
+        case 'Moderate Fire':
+          return { color: 'yellow', radius: 100 };
+        case 'Major Fire':
+          return { color: 'red', radius: 150 };
+        default:
+          return { color: 'blue', radius: 50 };
+      }
+    }
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    function loadCircles(incidents) {
+      var circles = [];
+      incidents.forEach(function (incident) {
+        var latitude = parseFloat(incident.location__latitude);
+        var longitude = parseFloat(incident.location__longitude);
+        var severity = incident.severity_level;
+        var locationName = incident.location__name;
+
+        var options = getCircleOptions(severity);
+        var circle = L.circle([latitude, longitude], {
+          color: options.color,
+          fillColor: options.color,
+          fillOpacity: 0.5,
+          radius: options.radius
+        }).addTo(map);
+
+        var popupContent = "Location: " + locationName + "<br>Severity: " + severity;
+        circle.bindPopup(popupContent);
+
+        circle.on('mouseover', function (e) {
+          this.openPopup();
+        });
+
+        circle.on('mouseout', function (e) {
+          this.closePopup();
+        });
+
+        circles.push(circle);
+      });
+      return circles;
+    }
+
+    var incidents = {{ incidents|safe }};
+    var allCircles = loadCircles(incidents);
+
+    document.getElementById('locationFilter').addEventListener('change', function (e) {
+      var location = e.target.value;
+
+      allCircles.forEach(function (circle) {
+        map.removeLayer(circle);
+      });
+
+      if (location) {
+        fetch('/api/incidents_by_location/' + location + '/')
+          .then(response => response.json())
+          .then(data => {
+            allCircles = loadCircles(data);
+          });
+      } else {
+        allCircles = loadCircles(incidents);
+      }
+    });
+  </script>
+{% endblock %}

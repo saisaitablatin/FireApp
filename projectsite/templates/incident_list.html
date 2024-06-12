@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Incidents</h2>
+  <a href="{% url 'incident-create' %}" class="btn btn-primary">Add New Incident</a>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Location</th>
+        <th>Date & Time</th>
+        <th>Severity Level</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for incident in object_list %}
+        <tr>
+          <td>{{ incident.location.name }}</td>
+          <td>{{ incident.date_time }}</td>
+          <td>{{ incident.severity_level }}</td>
+          <td>{{ incident.description }}</td>
+          <td>
+            <a href="{% url 'incident-update' incident.pk %}" class="btn btn-warning">Edit</a>
+            <a href="{% url 'incident-delete' incident.pk %}" class="btn btn-danger">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

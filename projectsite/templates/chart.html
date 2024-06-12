@@ -8,7 +8,71 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Line Chart</div>
+            <div class="card-title">Firefighter Experience Level Distribution</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="barFirefighterExperience"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Fire Truck Capacity Distribution</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="pieFireTruckCapacity"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Incidents Over Time by Severity</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="lineIncidentSeverityOverTime"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Temperature Distribution during Incidents</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="histogramTemperatureDuringIncidents"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Number of Incidents by City</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="horizontalBarIncidentsByCity"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Monthly Incident Counts</div>
           </div>
           <div class="card-body">
             <div class="chart-container">
@@ -20,7 +84,7 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Bar Chart</div>
+            <div class="card-title">Sales Data</div>
           </div>
           <div class="card-body">
             <div class="chart-container">
@@ -32,7 +96,7 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Pie Chart</div>
+            <div class="card-title">Severity Level Distribution</div>
           </div>
           <div class="card-body">
             <div class="chart-container">
@@ -44,7 +108,7 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Doughnut Chart</div>
+            <div class="card-title">Resource Allocation Distribution</div>
           </div>
           <div class="card-body">
             <div class="chart-container">
@@ -56,7 +120,7 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Radar Chart</div>
+            <div class="card-title">Skills Proficiency Distribution</div>
           </div>
           <div class="card-body">
             <div class="chart-container">
@@ -68,7 +132,7 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Bubble Chart</div>
+            <div class="card-title">Vehicle Statistics</div>
           </div>
           <div class="card-body">
             <div class="chart-container">
@@ -80,7 +144,7 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Multiple Line Chart</div>
+            <div class="card-title">Incident Trends Over Time</div>
           </div>
           <div class="card-body">
             <div class="chart-container">
@@ -92,7 +156,7 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Multiple Bar Chart</div>
+            <div class="card-title">Fire Incidents By Severity Level</div>
           </div>
           <div class="card-body">
             <div class="chart-container">
@@ -104,7 +168,7 @@
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Chart with HTML Legends</div>
+            <div class="card-title">Visitor and Pageview Statistics</div>
           </div>
           <div class="card-body">
             <div class="card-sub">Sometimes you need a very complex legend. In these cases, it makes sense to generate an HTML legend. Charts provide a generateLegend() method on their prototype that returns an HTML string for the legend.</div>
@@ -120,6 +184,121 @@
 {% endblock %} {% block chart %}
   <script>
     function loadChartData() {
+      fetch('/barFirefighterExperience/')
+        .then((response) => response.json())
+        .then((data) => {
+          var labels = Object.keys(data)
+          var counts = Object.values(data)
+          var barChart = document.getElementById('barFirefighterExperience').getContext('2d')
+          new Chart(barChart, {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Experience Level',
+                  data: counts,
+                  backgroundColor: '#59d05d'
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false
+            }
+          })
+        })
+    
+      fetch('/pieFireTruckCapacity/')
+        .then((response) => response.json())
+        .then((data) => {
+          var labels = Object.keys(data)
+          var counts = Object.values(data)
+          var pieChart = document.getElementById('pieFireTruckCapacity').getContext('2d')
+          new Chart(pieChart, {
+            type: 'pie',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  data: counts,
+                  backgroundColor: ['#1d7af3', '#f3545d', '#fdaf4b']
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false
+            }
+          })
+        })
+    
+      fetch('/lineIncidentSeverityOverTime/')
+        .then((response) => response.json())
+        .then((data) => {
+          var months = Object.keys(data)
+          var datasets = [
+            { label: 'Minor Fire', borderColor: '#1d7af3', fill: false, data: months.map((month) => data[month]['Minor Fire']) },
+            { label: 'Moderate Fire', borderColor: '#fdaf4b', fill: false, data: months.map((month) => data[month]['Moderate Fire']) },
+            { label: 'Major Fire', borderColor: '#f3545d', fill: false, data: months.map((month) => data[month]['Major Fire']) }
+          ]
+          var lineChart = document.getElementById('lineIncidentSeverityOverTime').getContext('2d')
+          new Chart(lineChart, {
+            type: 'line',
+            data: { labels: months, datasets: datasets },
+            options: { responsive: true, maintainAspectRatio: false }
+          })
+        })
+    
+      fetch('/histogramTemperatureDuringIncidents/')
+        .then((response) => response.json())
+        .then((data) => {
+          var temperatures = Object.keys(data)
+          var counts = Object.values(data)
+          var histogram = document.getElementById('histogramTemperatureDuringIncidents').getContext('2d')
+          new Chart(histogram, {
+            type: 'bar',
+            data: {
+              labels: temperatures,
+              datasets: [
+                {
+                  label: 'Temperature',
+                  data: counts,
+                  backgroundColor: '#59d05d'
+                }
+              ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+          })
+        })
+    
+      fetch('/horizontalBarIncidentsByCity/')
+        .then((response) => response.json())
+        .then((data) => {
+          var cities = Object.keys(data)
+          var counts = Object.values(data)
+          var barChart = document.getElementById('horizontalBarIncidentsByCity').getContext('2d')
+          new Chart(barChart, {
+            type: 'horizontalBar',
+            data: {
+              labels: cities,
+              datasets: [
+                {
+                  label: 'Incidents',
+                  data: counts,
+                  backgroundColor: '#1d7af3'
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                xAxes: [{ ticks: { beginAtZero: true } }]
+              }
+            }
+          })
+        })
       //   multiBarChart
       fetch('/multiBarChart/')
         .then((response) => response.json())

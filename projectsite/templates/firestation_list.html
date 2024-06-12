@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Fire Stations</h2>
+  <a href="{% url 'firestation-create' %}" class="btn btn-primary">Add New Fire Station</a>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Address</th>
+        <th>City</th>
+        <th>Country</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for firestation in object_list %}
+        <tr>
+          <td>{{ firestation.name }}</td>
+          <td>{{ firestation.latitude }}</td>
+          <td>{{ firestation.longitude }}</td>
+          <td>{{ firestation.address }}</td>
+          <td>{{ firestation.city }}</td>
+          <td>{{ firestation.country }}</td>
+          <td>
+            <a href="{% url 'firestation-update' firestation.pk %}" class="btn btn-warning">Edit</a>
+            <a href="{% url 'firestation-delete' firestation.pk %}" class="btn btn-danger">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Weather Conditions</h2>
+  <a href="{% url 'weathercondition-create' %}" class="btn btn-primary">Add New Weather Condition</a>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Incident</th>
+        <th>Temperature</th>
+        <th>Humidity</th>
+        <th>Wind Speed</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for weathercondition in object_list %}
+        <tr>
+          <td>{{ weathercondition.incident.description }}</td>
+          <td>{{ weathercondition.temperature }}</td>
+          <td>{{ weathercondition.humidity }}</td>
+          <td>{{ weathercondition.wind_speed }}</td>
+          <td>{{ weathercondition.weather_description }}</td>
+          <td>
+            <a href="{% url 'weathercondition-update' weathercondition.pk %}" class="btn btn-warning">Edit</a>
+            <a href="{% url 'weathercondition-delete' weathercondition.pk %}" class="btn btn-danger">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

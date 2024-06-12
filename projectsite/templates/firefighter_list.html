@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Firefighters</h2>
+  <a href="{% url 'firefighter-create' %}" class="btn btn-primary">Add New Firefighter</a>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Rank</th>
+        <th>Experience Level</th>
+        <th>Station</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for firefighter in object_list %}
+        <tr>
+          <td>{{ firefighter.name }}</td>
+          <td>{{ firefighter.rank }}</td>
+          <td>{{ firefighter.experience_level }}</td>
+          <td>{{ firefighter.station }}</td>
+          <td>
+            <a href="{% url 'firefighter-update' firefighter.pk %}" class="btn btn-warning">Edit</a>
+            <a href="{% url 'firefighter-delete' firefighter.pk %}" class="btn btn-danger">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
