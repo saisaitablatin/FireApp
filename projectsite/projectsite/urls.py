@@ -8,6 +8,7 @@ from fire.views import (
     LineCountbyMonth,
     MultilineIncidentTop3Country,
     MultipleBarbySeverity,
+    MapStation,
 )
 from fire import views
 
@@ -19,4 +20,5 @@ urlpatterns = [
     path("lineChart/", LineCountbyMonth, name="chart"),
     path("multilineChart/", MultilineIncidentTop3Country, name="chart"),
     path("multiBarChart/", MultipleBarbySeverity, name="chart"),
+    path("stations", MapStation, name="map-station"),
 ]
